@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Examen blanc : Aire des triangles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f9ff;--ink:#1f2350;--card:#fff;--line:#d3def5;--mut:#5b6190;--acc:#4b3fd6;--onacc:#fff;--ok:#1a8a5a;--ko:#c93a4f;--wn:#d9822b;--mg:#e8708a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12142b;--ink:#e6e9ff;--card:#1b1e3d;--line:#2b3060;--mut:#9aa1d6;--acc:#9d93ff;--onacc:#14163a;--ok:#4cd493;--ko:#ff7d90;--wn:#f0a458;--mg:#b4506a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12142b;--ink:#e6e9ff;--card:#1b1e3d;--line:#2b3060;--mut:#9aa1d6;--acc:#9d93ff;--onacc:#14163a;--ok:#4cd493;--ko:#ff7d90;--wn:#f0a458;--mg:#b4506a;color-scheme:dark}
+html{scroll-padding-top:calc(90px + env(safe-area-inset-top,0px))}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Nunito,system-ui,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px);background-size:100% 32px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+h1,h2,h3{font-family:"Bricolage Grotesque",Nunito,sans-serif;margin:0;line-height:1.15}
+main{max-width:740px;margin:0 auto;padding:20px 18px 80px 34px;border-left:2px solid var(--mg);min-height:100vh}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+button{font:inherit;font-weight:800;border:0;border-radius:10px;padding:12px 22px;background:var(--acc);color:var(--onacc);cursor:pointer}
+button.alt{background:transparent;color:var(--acc);border:2px solid var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible,label:focus-within{outline:3px solid var(--wn);outline-offset:2px}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:11;background:var(--card);border-bottom:2px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px}
+#clk{font:800 28px "Bricolage Grotesque",sans-serif;font-variant-numeric:tabular-nums}
+#clk.w{color:var(--ko)}
+.sm{color:var(--mut);font-size:14px}
+.pt{background:var(--acc);color:var(--onacc);border-radius:99px;padding:1px 10px;font-size:13px;font-weight:800;white-space:nowrap}
+.q{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px 18px;margin:12px 0}
+.q .h{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-weight:800}
+.q.good{border-left:6px solid var(--ok)}.q.mid{border-left:6px solid var(--wn)}.q.bad{border-left:6px solid var(--ko)}
+.opt{display:block;padding:9px 12px;margin:6px 0;border:1.5px solid var(--line);border-radius:9px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.opt input{margin-right:8px;accent-color:var(--acc)}
+select,input[type=text]{font:inherit;padding:9px 12px;border:2px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+input[type=text]{width:130px}
+.it{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap}.it>span{min-width:130px;font-weight:600}
+svg{max-width:100%;height:auto}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.2;margin:0 .2em}
+.fr i{font-style:normal;padding:0 .25em}.fr i:first-child{border-bottom:1.5px solid currentColor}
+sup{font-size:.7em}
+.ex{color:var(--mut);font-size:15px;margin-top:6px}
+.big{font:800 64px "Bricolage Grotesque",sans-serif;color:var(--acc);line-height:1}
+.bar2{height:14px;background:var(--line);border-radius:8px;overflow:hidden;margin:4px 0 2px}
+.bar2 b{display:block;height:100%}
+.row{display:flex;justify-content:space-between;gap:10px;font-weight:800}
+#msg{color:var(--wn);font-weight:800;margin:10px 0}
+ul{padding-left:20px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $=s=>document.querySelector(s);
+const R=a=>a[Math.floor(Math.random()*a.length)];
+const sh=a=>a.map(x=>[Math.random(),x]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+const dec=v=>String(v).replace(".",",");
+const fr=(t,d)=>`<span class="fr"><i>${t}</i><i>${d}</i></span>`;
+const C=(part,pts,html,ok,bad,expl)=>{const o=sh([ok,...bad]);return{part,pts,html,t:"c",opts:o,ans:o.indexOf(ok),show:ok,expl}};
+const S=(part,pts,html,items,opts,expl)=>({part,pts,html,t:"s",items,opts,expl});
+const A=(part,pts,html,val,u,expl)=>({part,pts,html,t:"a",val,u,show:`${dec(val)} ${u}`,expl});
+const PARTS=["Vocabulaire et droites remarquables","Formule et méthode","Calculs d’aires","Inégalité triangulaire"];
+const TIPS=[
+"Hauteur : passe par un sommet et est perpendiculaire au côté opposé. Médiane : sommet + milieu du côté opposé. Médiatrice : perpendiculaire à un segment en son milieu. Les trois hauteurs sont concourantes et une hauteur peut être à l’extérieur du triangle.",
+"A = (b × h) ÷ 2. Rédaction en 4 étapes : 1) formule du cours, 2) noms des segments de la figure, 3) valeurs numériques, 4) calcul et résultat avec l’unité d’aire.",
+"Choisis le bon duo base / hauteur relative (elles sont perpendiculaires). Dans un triangle rectangle, les deux côtés de l’angle droit sont la base et la hauteur. Si la hauteur est à l’extérieur, utilise la vraie longueur de la base (sans les pointillés). N’oublie pas l’unité au carré (cm², m²).",
+"Un triangle est constructible si son plus long côté est strictement plus petit que la somme des deux autres."];
+const MEN=s=>s>=16?"Très bien 🎉":s>=14?"Bien 👏":s>=12?"Assez bien 👍":s>=10?"Passable : tu y es presque":"À retravailler, mais tu vas progresser";
+function tri(k,n,t,x){
+ const T=(s,a,b,c,col)=>`<text x="${a}" y="${b}" font-size="14" font-weight="800" text-anchor="${c||"middle"}" style="fill:${col||"var(--ink)"}">${s}</text>`;
+ const poly=p=>`<polygon points="${p}" style="fill:var(--line);stroke:var(--ink);stroke-width:2"/>`;
+ const red=`stroke="#c93a4f" stroke-width="2.5" stroke-dasharray="5 4"`;
+ let s="";
+ if(k=="a"){s=poly("30,150 260,150 130,35")+`<path d="M130 35V150" ${red}/><path d="M130 138h12v12" fill="none" style="stroke:var(--ink)"/>`+T(n[0],20,168)+T(n[1],130,26)+T(n[2],270,168)+T(n[3],130,168)+T(`${n[0]+n[2]} = ${t.b} ${t.u}`,145,184)+T(`${n[1]+n[3]} = ${t.h} ${t.u}`,137,100,"start","#c93a4f");
+  if(x)s+=T(`${n[0]+n[1]} = ${x[0]} ${t.u}`,70,80,"end")+T(`${n[1]+n[2]} = ${x[1]} ${t.u}`,200,80,"start");}
+ else if(k=="r"){s=poly("40,150 40,40 240,150")+`<path d="M52 150V138H40" fill="none" style="stroke:var(--ink)"/>`+T(n[0],40,30)+T(n[1],30,168)+T(n[2],250,168)+T(`${n[0]+n[1]} = ${t.b} ${t.u}`,34,100,"end")+T(`${n[1]+n[2]} = ${t.h} ${t.u}`,140,184);}
+ else{s=poly("50,35 125,150 260,150")+`<path d="M5 150H125" style="stroke:var(--mut)" stroke-dasharray="3 4"/><path d="M50 35V150" ${red}/><path d="M50 138h12v12" fill="none" style="stroke:var(--ink)"/>`+T(n[0],50,26)+T(n[1],125,168)+T(n[2],270,168)+T(n[3],50,168)+T(`${n[1]+n[2]} = ${t.b} ${t.u}`,192,184)+T(`${n[0]+n[3]} = ${t.h} ${t.u}`,44,100,"end","#c93a4f");}
+ return `<svg viewBox="-60 0 350 195" width="100%" style="max-width:380px;display:block;margin:8px 0" role="img" aria-label="Triangle">${s}</svg>`;
+}
+function calc(k,n,x,pts,nb){
+ const u=R(["cm","m"]),b=R(nb[0]),h=R(nb[1]),r=b*h/2;
+ const bs=k=="r"?n[0]+n[1]:k=="a"?n[0]+n[2]:n[1]+n[2],hs=k=="r"?n[1]+n[2]:k=="a"?n[1]+n[3]:n[0]+n[3];
+ const nm=k=="r"?`Le triangle ${n[0]+n[1]+n[2]} est rectangle en ${n[1]}.`:`Calcule l’aire du triangle ${k=="a"?n[0]+n[1]+n[2]:n[0]+n[1]+n[2]}.`;
+ const ex=`A = ${fr("b × h",2)} = ${fr(bs+" × "+hs,2)} = ${fr(b+" × "+h,2)} = ${dec(r)} ${u}².`+(k=="o"?" La hauteur tombe à l’extérieur : on utilise la vraie longueur de la base "+bs+", sans les pointillés.":x?` Les longueurs ${n[0]+n[1]} et ${n[1]+n[2]} ne servent pas : il faut la base et la hauteur relative à cette base.`:"");
+ return A(2,pts,`${nm} Rédige au brouillon avec les 4 étapes, puis donne le résultat avec son unité.${tri(k,n,{b,h,u},x?[h+R([1,2,3]),h+R([2,3,4])]:null)}`,r,u+"²",ex);
+}
+function gen(){
+ const q=[];
+ q.push(C(0,1,"Quelle est la définition d’une hauteur d’un triangle ?","Une droite passant par un sommet et perpendiculaire au côté opposé",["Une droite passant par un sommet et par le milieu du côté opposé","Une droite perpendiculaire à un côté en son milieu","Une droite qui partage un angle en deux angles égaux"],"Hauteur : sommet + angle droit avec le côté opposé. Médiane : sommet + milieu. Médiatrice : milieu + angle droit."));
+ q.push(S(0,3,"Relie chaque définition au nom de la droite remarquable.",[{l:"Perpendiculaire à un segment, passe par son milieu",c:"Médiatrice"},{l:"Passe par un sommet et par le milieu du côté opposé",c:"Médiane"},{l:"Passe par un sommet, perpendiculaire au côté opposé",c:"Hauteur"}],sh(["Médiatrice","Médiane","Hauteur"]),"Médiatrice (milieu + angle droit), médiane (sommet + milieu), hauteur (sommet + angle droit)."));
+ const v=R([["Une hauteur d’un triangle peut se trouver à l’extérieur du triangle.","Vrai","C’est le cas dans un triangle qui a un angle obtus."],["Les trois hauteurs d’un triangle se coupent toutes en un seul point.","Vrai","Les trois hauteurs sont concourantes."],["Une médiane est toujours perpendiculaire au côté qu’elle coupe.","Faux","Elle passe par le milieu du côté, mais ne forme pas forcément un angle droit."],["Tous les points de la médiatrice d’un segment sont à égale distance des extrémités du segment.","Vrai","C’est la propriété de la médiatrice (équidistance)."]]);
+ q.push(C(0,1,`Vrai ou faux : ${v[0]}`,v[1],[v[1]=="Vrai"?"Faux":"Vrai"],v[2]));
+ q.push(C(1,1,"Quelle est la formule de l’aire d’un triangle (b : base, h : hauteur relative à cette base) ?",`A = ${fr("b × h",2)}`,[`A = b × h`,`A = ${fr("b + h",2)}`,`A = b × h × 2`],"L’aire d’un triangle est la moitié de celle du rectangle de même base et de même hauteur."));
+ const st=["Écrire la formule du cours","Remplacer par les noms des segments de la figure","Remplacer par les valeurs numériques","Calculer et écrire le résultat avec son unité d’aire"];
+ q.push(S(1,2,"Remets dans l’ordre les 4 étapes de rédaction d’un calcul d’aire.",st.map((s,i)=>({l:`Étape ${i+1}`,c:s})),sh(st),"Ordre : formule, noms des segments, valeurs numériques, calcul avec l’unité."));
+ const u=R(["cm","m"]);
+ q.push(C(1,1,`Les longueurs d’un triangle sont en ${u}. L’aire s’exprime en :`,`${u}²`,[u,`${u}³`,`${u} × 2`],`Une aire s’exprime avec une unité au carré : ${u}².`));
+ q.push(calc("a",["A","B","C","H"],false,2,[[6,8,10,12],[3,4,5,7]]));
+ q.push(calc("r",["A","B","C"],false,2,[[6,8,5,9],[4,10,7,12]]));
+ q.push(calc("o",["A","B","C","H"],false,2,[[8,6,10,12],[5,4,7,3]]));
+ q.push(calc("a",["R","S","T","H"],true,2,[[7,9,11,5],[4,6,8]]));
+ const L=sh([["AB","BC","AC"],["EF","FG","EG"],["RS","ST","RT"]]),kind=sh([1,1,0]);
+ const it=L.map((nm,i)=>{let a=R([2,3,4,5,6]),b=R([3,4,5,7]),c,ok=kind[i];
+  c=ok?R(Array.from({length:a+b-1-Math.abs(a-b)},(_,j)=>Math.abs(a-b)+1+j)):a+b+R([0,1,2]);
+  const ls=sh([a,b,c]),m=Math.max(...ls),o=ls.reduce((s,x)=>s+x,0)-m;
+  return{l:`${nm[0]+nm[1]} = ${ls[0]} cm ; ${nm[1]+nm[2]} = ${ls[1]} cm ; ${nm[0]+nm[2]} = ${ls[2]} cm`,c:ok?"Constructible":"Non constructible",x:`${m} ${m<o?"<":"≥"} ${o} : ${m<o?"oui":"non"}, `}});
+ const s3=S(3,3,"Pour chaque triplet de longueurs, dis si le triangle est constructible.",it,["Constructible","Non constructible"],"Constructible si le plus long côté est strictement plus petit que la somme des deux autres.");
+ s3.items.forEach(i=>i.l=i.l);q.push(s3);
+ return q;
+}
+function pn(s){s=String(s).replace(/[\s\u00a0\u202f]/g,"").replace(",",".");if(!s)return NaN;return Number(s)}
+function sc(q,a){
+ if(q.t=="c")return a===q.ans?q.pts:0;
+ if(q.t=="s")return q.items.reduce((s,it,j)=>s+(a[j]===it.c?q.pts/q.items.length:0),0);
+ return (Math.abs(pn(a.v)-q.val)<1e-9?q.pts-0.5:0)+(a.u===q.u?0.5:0);
+}
+const DUR=2400;let qs,ans,t0,tid,conf;
+const hist=()=>{try{return JSON.parse(localStorage.getItem("anfal_aire_h")||"[]")}catch(e){return[]}};
+const save=r=>{try{localStorage.setItem("anfal_aire_h",JSON.stringify([...hist(),r].slice(-10)))}catch(e){}};
+function intro(){
+ const h=hist();
+ $("#app").innerHTML=`<main><h1>Examen blanc<br>L’aire des triangles</h1><p class="sm">Pour Anfal · 5<sup>e</sup> · Maths</p>
+ <div class="card"><h3>Comme en classe</h3><ul><li>Durée : <b>40 minutes</b>. Quand le temps est écoulé, la copie est rendue automatiquement.</li><li>11 questions sur <b>20 points</b> : vocabulaire, formule et méthode, calculs d’aires, inégalité triangulaire.</li><li>Sans cours. Garde un brouillon, une règle et un crayon : écris les <b>4 étapes</b> de rédaction avant de donner ton résultat.</li><li>Pour les aires, pense à l’<b>unité au carré</b> : elle rapporte des points.</li><li>À la fin : ta note, ton score en % par partie, et la correction détaillée.</li><li>Les nombres changent à chaque tentative.</li></ul></div>
+ ${h.length?`<div class="card"><h3>Tes tentatives</h3>${h.map((r,i)=>`<div class="row"><span>Tentative ${i+1} · ${r.d}</span><span>${dec(r.s)}/20</span></div>`).join("")}</div>`:""}
+ <button onclick="start()">Commencer l’examen</button></main>`;
+}
+function start(){qs=gen();ans=qs.map(q=>q.t=="s"?Array(q.items.length).fill(""):q.t=="a"?{v:"",u:""}:null);conf=false;t0=Date.now();clearInterval(tid);tid=setInterval(tick,500);exam();window.scrollTo(0,0)}
+function exam(){
+ let last=-1,html="";
+ qs.forEach((q,i)=>{
+  if(q.part!==last){last=q.part;const mx=qs.filter(x=>x.part==q.part).reduce((a,x)=>a+x.pts,0);html+=`<h2 style="margin-top:28px">Partie ${"ABCD"[q.part]} : ${PARTS[q.part]} <span class="pt">${mx} pts</span></h2>`}
+  html+=`<div class="q"><div class="h"><span>Question ${i+1}</span><span class="pt">${q.pts} pt${q.pts>1?"s":""}</span></div><div>${q.html}</div>`+
+  (q.t=="c"?q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" onchange="ans[${i}]=${j};prog()">${o}</label>`).join(""):
+   q.t=="s"?q.items.map((it,j)=>`<div class="it"><span>${it.l}</span><select aria-label="${it.l.replace(/"/g,"")}" onchange="ans[${i}][${j}]=this.value;prog()"><option value="">— choisir —</option>${q.opts.map(o=>`<option>${o}</option>`).join("")}</select></div>`).join(""):
+   `<div class="it"><span style="min-width:0">A =</span><input type="text" inputmode="decimal" aria-label="Valeur de l’aire" autocomplete="off" oninput="ans[${i}].v=this.value;prog()"><select aria-label="Unité" onchange="ans[${i}].u=this.value;prog()"><option value="">unité</option>${["cm","cm²","m","m²"].map(o=>`<option>${o}</option>`).join("")}</select></div>`)+`</div>`;
+ });
+ $("#app").innerHTML=`<header class="bar"><div><b>Examen blanc · Aire des triangles</b><div class="sm" id="pg"></div></div><div id="clk">40:00</div></header><main>${html}<div id="msg" role="status"></div><button onclick="sub()">Rendre ma copie</button></main>`;
+ prog();tick();
+}
+const blank=(q,a)=>q.t=="c"?a===null:q.t=="s"?a.some(x=>x===""):a.v.trim()===""||a.u==="";
+const miss=()=>qs.filter((q,i)=>blank(q,ans[i])).length;
+function prog(){conf=false;const e=$("#msg");if(e)e.textContent="";$("#pg").textContent=`${qs.length-miss()} / ${qs.length} questions complètes`}
+function tick(){const l=Math.max(0,DUR-Math.floor((Date.now()-t0)/1000));const c=$("#clk");if(!c)return;c.textContent=String(Math.floor(l/60)).padStart(2,"0")+":"+String(l%60).padStart(2,"0");c.className=l<=300?"w":"";if(l<=0)finish(true)}
+function sub(){if(miss()>0&&!conf){conf=true;$("#msg").textContent=`Il reste ${miss()} question(s) incomplète(s). Appuie encore sur « Rendre ma copie » pour confirmer.`;return}finish(false)}
+function finish(auto){
+ clearInterval(tid);
+ const used=Math.min(DUR,Math.floor((Date.now()-t0)/1000));
+ const ea=qs.map((q,i)=>sc(q,ans[i]));
+ const got=[0,0,0,0],mx=[0,0,0,0];
+ qs.forEach((q,i)=>{mx[q.part]+=q.pts;got[q.part]+=ea[i]});
+ const s=got.reduce((a,b)=>a+b,0),pc=got.map((g,i)=>Math.round(100*g/mx[i]));
+ const h=hist(),prev=h.length?h[h.length-1].s:null;
+ save({d:new Date().toLocaleDateString("fr-FR"),s,pc});
+ const col=p=>p>=80?"var(--ok)":p>=50?"var(--wn)":"var(--ko)";
+ const lab=p=>p>=80?"Solide":p>=50?"Presque, à consolider":"À revoir en priorité";
+ const weak=pc.map((p,i)=>i).filter(i=>pc[i]<80).sort((a,b)=>pc[a]-pc[b]);
+ $("#app").innerHTML=`<main><h1>Ta copie corrigée</h1>
+ ${auto?`<p style="color:var(--ko);font-weight:800">Temps écoulé : la copie a été rendue automatiquement.</p>`:""}
+ <div class="card"><div class="big">${dec(s)}<span style="font-size:32px">/20</span></div><h3 style="margin-top:6px">${MEN(s)}</h3>
+ <p class="sm">Temps utilisé : ${Math.floor(used/60)} min ${used%60} s${prev!==null?` · Tentative précédente : ${dec(prev)}/20 (${s-prev>=0?"+":""}${dec(Math.round((s-prev)*10)/10)})`:""}</p></div>
+ <h2>Ton score par partie</h2>
+ ${pc.map((p,i)=>`<div class="card" style="margin:10px 0"><div class="row"><span>${PARTS[i]}</span><span style="color:${col(p)}">${p} %</span></div><div class="bar2"><b style="width:${p}%;background:${col(p)}"></b></div><div class="sm">${dec(got[i])}/${dec(mx[i])} pts · ${lab(p)}</div></div>`).join("")}
+ <div class="card"><h3>Ce qu’il faut retravailler</h3>${weak.length?`<ul>${weak.map(i=>`<li><b>${PARTS[i]}</b> (${pc[i]} %) : ${TIPS[i]}</li>`).join("")}</ul>`:`<p>Toutes les parties sont solides. Bravo !</p>`}</div>
+ <h2>Correction détaillée</h2>
+ ${qs.map((q,i)=>{const e=ea[i],cl=e>=q.pts?"good":e>0?"mid":"bad",a=ans[i];let b;
+  if(q.t=="c")b=`<div class="sm">Ta réponse : ${a===null?"(pas de réponse)":q.opts[a]}</div>${e?"":`<div>Bonne réponse : <b>${q.show}</b></div>`}`;
+  else if(q.t=="s")b=q.items.map((it,j)=>{const o=a[j]===it.c;return `<div>${o?"✓":"✗"} ${it.l} : ${a[j]||"(pas de réponse)"}${o?"":` → <b>${it.c}</b>`}</div>`}).join("");
+  else b=`<div class="sm">Ta réponse : ${a.v.trim()?a.v.replace(/[&<>]/g,"")+" "+a.u:"(pas de réponse)"}</div><div>Bonne réponse : <b>${q.show}</b></div>`;
+  return `<div class="q ${cl}"><div class="h"><span>Question ${i+1}</span><span class="pt">${dec(e)}/${q.pts}</span></div><div>${q.html.replace(/<svg[\s\S]*<\/svg>/,"")}</div>${b}<div class="ex">${q.expl}</div></div>`}).join("")}
+ <button onclick="start()">Refaire un examen (nouveaux nombres)</button> <button class="alt" onclick="intro()">Accueil</button></main>`;
+ window.scrollTo(0,0);
+}
+intro();
+</script>
+</body>
+</html>
